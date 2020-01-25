@@ -1,5 +1,10 @@
 package me.hyoseo.housingfinance;
 
+import lombok.RequiredArgsConstructor;
+import me.hyoseo.housingfinance.database.model.Institution;
+import me.hyoseo.housingfinance.database.model.InstitutionSupport;
+import me.hyoseo.housingfinance.database.repository.InstitutionRepository;
+import me.hyoseo.housingfinance.database.repository.InstitutionSupportRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,10 +15,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @SpringBootApplication
 public class HousingFinanceApplication implements CommandLineRunner {
+
+    private final InstitutionRepository institutionRepository;
+
+    private final InstitutionSupportRepository institutionSupportRepository;
 
     public static void main(String[] args) {
         SpringApplication.run(HousingFinanceApplication.class, args);
@@ -31,7 +40,7 @@ public class HousingFinanceApplication implements CommandLineRunner {
             if (scanner.hasNextLine()) {
                 record = getRecordFromLine(scanner.nextLine());
 
-                List<String> bankNames = record.subList(2, record.size()).stream().map(bankName -> {
+                record.subList(2, record.size()).stream().map(bankName -> {
                     for (Character bankNameEndChar : bankNameEndChars) {
                         int found_index_pos = bankName.indexOf(bankNameEndChar);
                         if (found_index_pos != -1) {
@@ -40,9 +49,7 @@ public class HousingFinanceApplication implements CommandLineRunner {
                     }
 
                     return bankName;
-                }).collect(Collectors.toList());
-
-                System.out.println(bankNames);
+                }).forEach(bankName -> institutionRepository.save(new Institution(bankName)));
             }
 
             // 그 외의 행들 (각 금융기관 지원 금액 처리)
@@ -51,17 +58,13 @@ public class HousingFinanceApplication implements CommandLineRunner {
                 String year = record.get(0);
                 String month = record.get(1);
 
-                System.out.println("year : " + year + ", month : " + month);
-                record.subList(2, record.size()).forEach(amount -> {
-                    System.out.println(amount);
-                });
-
-                System.out.println(record);
-
-                // 필요 테이블
-                // 기관코드 기관명
-                // 연도 월 기관코드 지원금액
-
+                for (int col = 2; col < record.size(); ++col) {
+                    institutionSupportRepository.save(new InstitutionSupport(
+                            Short.valueOf(year),
+                            Byte.valueOf(month),
+                            institutionRepository.findById(col-1).get(),
+                            Integer.valueOf(record.get(col))));
+                }
             }
         }
     }
