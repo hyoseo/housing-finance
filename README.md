@@ -19,10 +19,10 @@ Spring Boot 2.2.4
 ### 2. jar 파일 실행 (**jar 파일을 다운로드하거나 빌드한 이후여야 합니다**)
 [housing-finance-1.0.0.jar 다운로드](http://naver.me/xpDJg8MF)
 ```
-java -jar ./target/housing-finance-1.0.0.jar
+java -jar ./housing-finance-1.0.0.jar
 
 # 기본으로 8080포트를 사용합니다. 포트를 변경하여 실행하고자 한다면 다음 명령을 실행합니다.
-java -jar ./target/housing-finance-1.0.0.jar --server.port=10050
+java -jar ./housing-finance-1.0.0.jar --server.port=10050
 ```
 ## 데이터베이스
 ### H2 Memory DB
@@ -177,5 +177,10 @@ List<Tuple> findYearlyAvgSupport(@Param("institute_code") Integer instituteCode)
 institute_supports 테이블에서 특정 기관 데이터만에서 연도와 기관으로 그룹으로 묶은 후  
 연도, 기관, 해당 연도 그 기관의 평균지원금액을 추출하며 평균지원금액 내림차순으로 정렬합니다.  
 핸들러에서 결과 리스트의 제일 앞과 제일 뒤의 데이터만을 뽑아 형식을 변경하여 출력합니다.  
+  
+## 테스트
+#### 1. [AuthControllerTest](https://github.com/hyoseo/housing-finance/blob/master/src/test/java/me/hyoseo/housingfinance/controller/AuthControllerTest.java)  
+#### 2. [InstituteControllerTest](https://github.com/hyoseo/housing-finance/blob/master/src/test/java/me/hyoseo/housingfinance/controller/InstituteControllerTest.java)  
+#### 3. [CryptoServiceTest](https://github.com/hyoseo/housing-finance/blob/master/src/test/java/me/hyoseo/housingfinance/service/CryptoServiceTest.java)  
 
 
