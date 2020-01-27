@@ -89,26 +89,26 @@ public class DataFileController {
         try (Scanner rowScanner = new Scanner(line)) {
             rowScanner.useDelimiter(",");
             while (rowScanner.hasNext()) {
-                String row = rowScanner.next();
-                if (row.startsWith("\"")){
-                    StringBuilder composited_row = new StringBuilder();
-                    composited_row.append(row, 1, row.length());
+                String col = rowScanner.next();
+                if (col.startsWith("\"")){
+                    StringBuilder composited_col = new StringBuilder();
+                    composited_col.append(col, 1, col.length());
 
                     while (rowScanner.hasNext()) {
-                        String related_row = rowScanner.next();
-                        if (related_row.endsWith("\"")) {
-                            composited_row.append(related_row, 0, related_row.length() - 1);
+                        String related_col = rowScanner.next();
+                        if (related_col.endsWith("\"")) {
+                            composited_col.append(related_col, 0, related_col.length() - 1);
                             break;
                         } else {
-                            composited_row.append(related_row);
+                            composited_col.append(related_col);
                         }
                     }
 
-                    row = composited_row.toString();
+                    col = composited_col.toString();
                 }
 
-                if (row.isEmpty() == false)
-                    values.add(row);
+                if (col.isEmpty() == false)
+                    values.add(col);
             }
         }
 
