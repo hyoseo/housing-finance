@@ -16,7 +16,8 @@ Spring Boot 2.2.4
 ./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=10050
 ```
 
-### 2. jar 파일 실행 (**빌드한 이후여야 합니다**)
+### 2. jar 파일 실행 (**jar 파일을 다운로드하거나 빌드한 이후여야 합니다**)
+[housing-finance-1.0.0.jar 다운로드](https://drive.google.com/file/d/1CTa0raCaVAlLv9bez6eclVZcLu3SsDCO/view?usp=sharing)
 ```
 java -jar ./target/housing-finance-1.0.0.jar
 
@@ -30,6 +31,10 @@ java -jar ./target/housing-finance-1.0.0.jar --server.port=10050
 
 2. institute_supports(year, month, institute_code, support_amount)  
 어떤 기관이 어떤 연도, 월에 얼마 만큼의 지원을 했는지에 대한 정보를 가지고 있는 테이블  
+
+## Swagger
+Swagger 주소 : [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)  
+포트를 변경하여 띄우셨을 떄는 8080을 띄운 포트로 변경하여 주세요.  
 
 ## 문제해결 전략
 ### 1. signup 계정생성 API: 입력으로 ID, PW 받아 내부 DB 에 계정 저장하고 토큰 생성하여 출력  
