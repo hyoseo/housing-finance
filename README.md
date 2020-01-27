@@ -3,7 +3,7 @@
 Spring Boot 2.2.4
 
 ## 빌드 방법
-### Repository를 Clone하거나 ZIP파일로 다운 받고 압축 푼 후 해당 폴더에서 다음 명령을 실행합니다.
+### Repository를 Clone 후 해당 폴더에서 다음 명령을 실행합니다.
 ```
 ./mvnw package
 ```
