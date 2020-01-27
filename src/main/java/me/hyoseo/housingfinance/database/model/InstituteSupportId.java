@@ -5,10 +5,10 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class InstitutionSupportId implements Serializable {
+public class InstituteSupportId implements Serializable {
     private Short year;
 
     private Byte month;
 
-    private Integer institution;
+    private Integer institute;
 }

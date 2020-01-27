@@ -9,8 +9,12 @@ import javax.persistence.*;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "institutions")
-public class Institution {
+@Table(name = "institutes")
+public class Institute {
+    public Institute(String name) {
+        this.name = name;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "institute_code")
@@ -18,8 +22,4 @@ public class Institution {
 
     @Column(name = "institute_name", unique = true)
     private String name;
-
-    public Institution(String name) {
-        this.name = name;
-    }
 }

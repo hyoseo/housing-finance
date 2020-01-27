@@ -10,9 +10,9 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "institution_supports")
-@IdClass(InstitutionSupportId.class)
-public class InstitutionSupport {
+@Table(name = "institute_supports")
+@IdClass(InstituteSupportId.class)
+public class InstituteSupport {
     @Id
     private Short year;
 
@@ -20,9 +20,9 @@ public class InstitutionSupport {
     private Byte month;
 
     @Id
-    @ManyToOne(targetEntity = Institution.class)
+    @ManyToOne(targetEntity = Institute.class)
     @JoinColumn(name = "institute_code")
-    private Institution institution;
+    private Institute institute;
 
     private Integer supportAmount;
 }
