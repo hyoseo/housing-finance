@@ -24,5 +24,6 @@ public class InstituteSupport {
     @JoinColumn(name = "institute_code")
     private Institute institute;
 
+    @Column(name = "support_amount")
     private Integer supportAmount;
 }

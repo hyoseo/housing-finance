@@ -1,6 +1,5 @@
 package me.hyoseo.housingfinance.interceptor;
 
-import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import me.hyoseo.housingfinance.error.CommonException;
 import me.hyoseo.housingfinance.error.ErrorCode;
