@@ -17,7 +17,7 @@ Spring Boot 2.2.4
 ```
 
 ### 2. jar 파일 실행 (**jar 파일을 다운로드하거나 빌드한 이후여야 합니다**)
-[housing-finance-1.0.0.jar 다운로드](https://drive.google.com/file/d/1CTa0raCaVAlLv9bez6eclVZcLu3SsDCO/view?usp=sharing)
+[housing-finance-1.0.0.jar 다운로드](http://naver.me/xpDJg8MF)
 ```
 java -jar ./target/housing-finance-1.0.0.jar
 
@@ -26,6 +26,10 @@ java -jar ./target/housing-finance-1.0.0.jar --server.port=10050
 ```
 ## 데이터베이스
 ### H2 Memory DB
+H2 Console 주소 : [http://localhost:8080/h2-console](http://localhost:8080/h2-console)  
+포트를 변경하여 띄우셨을 때는 8080을 띄운 포트로 변경하여 주세요.  
+JDBC URL : jdbc:h2:mem:testdb, User Name : hyoseo, Password : 2668
+
 1. institutes(institute_code, institute_name)  
 기관 정보를 가지고 있는 테이블  
 
@@ -34,8 +38,13 @@ java -jar ./target/housing-finance-1.0.0.jar --server.port=10050
 
 ## Swagger
 Swagger 주소 : [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)  
-포트를 변경하여 띄우셨을 떄는 8080을 띄운 포트로 변경하여 주세요.  
-
+포트를 변경하여 띄우셨을 는 8080을 띄운 포트로 변경하여 주세요.  
+  
+## 빠른 서비스 이용 방법
+#### 1. 회원가입을 하여 Access-Token을 발급받습니다.  
+#### 2. /data/csv_files를 실행해 기본 데이터를 밀어넣습니다.  
+#### 3. /institutes에 있는 API를 자유롭게 사용합니다.  
+  
 ## 문제해결 전략
 ### 1. signup 계정생성 API: 입력으로 ID, PW 받아 내부 DB 에 계정 저장하고 토큰 생성하여 출력  
 대표 소스 : [AuthController.java](https://github.com/hyoseo/housing-finance/blob/master/src/main/java/me/hyoseo/housingfinance/controller/AuthController.java), 
@@ -105,6 +114,7 @@ bank_name_end_chars도 기본 값으로 1,(를 처리합니다.
 Scanner를 이용하여 한 줄씩 읽으며 ,를 delimiter로 활용하여 한 열씩 자릅니다.  
 첫 줄에 은행들 이름이 있는데 bank_name_end_chars는 이 은행 이름만을 추출하는데 사용됩니다.  
 새로운 csv 파일에서 은행 이름 추출하는데 다른 문자가 활용될 수 있기에 RequestParam으로 받을 수 있게 처리하였습니다.  
+</br>
 그 다음은 데이터 행들을 추출하여 DB에 넣어주는데 2016년부터의 데이터에는 "와 ,가 들어간 열이 존재합니다.  
 이를 처리하기 위해 열이 "로 시작할 경우 다음 열이 "로 끝나기 전까지 열들을 합칩니다.  
 한 열은 한 번만 조회되며 행에서 열들을 추출하는데 걸리는 시간복잡도는 O(n)입니다.  
