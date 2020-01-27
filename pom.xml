@@ -10,7 +10,7 @@
     </parent>
     <groupId>me.hyoseo</groupId>
     <artifactId>housing-finance</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>housing-finance</name>
     <description>Housing finance project for KakaoPay Test</description>
 
