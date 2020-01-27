@@ -1,7 +1,10 @@
 package me.hyoseo.housingfinance.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import me.hyoseo.housingfinance.database.model.Institute;
 import me.hyoseo.housingfinance.database.repository.InstituteRepository;
 import me.hyoseo.housingfinance.database.repository.InstituteSupportRepository;
@@ -21,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.persistence.Tuple;
 import java.util.List;
 
-@Slf4j
+@Api(tags = {"기관 컨트롤러"})
 @RequiredArgsConstructor
 @RequestMapping("/institutes")
 @RestController
@@ -31,13 +34,15 @@ public class InstituteController {
 
     private final InstituteSupportRepository instituteSupportRepository;
 
-    // 주택금융 공급 금융기관(은행) 목록
+    @ApiOperation(value = "주택금융 공급 금융기관(은행) 목록", response = ResponseEntity.class)
+    @ApiImplicitParams(@ApiImplicitParam(name = "Access-Token", value = "Access-Token 필요", paramType = "header"))
     @GetMapping
     public ResponseEntity<List<Institute>> getInstitutes() {
         return ResponseEntity.ok(instituteRepository.findAll());
     }
 
-    // 년도별 각 금융기관의 지원금액 합계
+    @ApiOperation(value = "년도별 각 금융기관의 지원금액 합계", response = ResponseEntity.class)
+    @ApiImplicitParams(@ApiImplicitParam(name = "Access-Token", value = "Access-Token 필요", paramType = "header"))
     @GetMapping("/total_institutes_support")
     public ResponseEntity<TotalInstituteSupport> getTotalInstitutesSupport() {
         TotalInstituteSupport totalInstituteSupport = new TotalInstituteSupport();
@@ -63,7 +68,8 @@ public class InstituteController {
         return ResponseEntity.ok(totalInstituteSupport);
     }
 
-    // 각 년도별 각 기관의 전체 지원금액 중에서 가장 큰 금액의 기관명
+    @ApiOperation(value = "각 년도별 각 기관의 전체 지원금액 중에서 가장 큰 금액의 기관명", response = ResponseEntity.class)
+    @ApiImplicitParams(@ApiImplicitParam(name = "Access-Token", value = "Access-Token 필요", paramType = "header"))
     @GetMapping("/top_institute_support")
     public ResponseEntity<TopInstituteSupport> getTopInstituteSupport() {
         List<Tuple> tuples = instituteSupportRepository.findYearlyTopSupportInstitutes(
@@ -75,7 +81,8 @@ public class InstituteController {
                 ((Institute)tuples.get(0).get(1)).getName()));
     }
 
-    // 전체 년도에서 외환은행의 지원금액 평균 중에서 가장 작은 금액과 큰 금액
+    @ApiOperation(value = "전체 년도에서 외환은행의 지원금액 평균 중에서 가장 작은 금액과 큰 금액", response = ResponseEntity.class)
+    @ApiImplicitParams(@ApiImplicitParam(name = "Access-Token", value = "Access-Token 필요", paramType = "header"))
     @GetMapping("/institute_avg_min_max_support")
     public ResponseEntity<InstituteAvgMinMaxSupport> getInstituteAvgMinMaxSupport(
             @RequestParam(value = "bank", defaultValue = "외환은행") String bank) {

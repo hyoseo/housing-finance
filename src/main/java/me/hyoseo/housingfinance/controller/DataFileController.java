@@ -1,7 +1,10 @@
 package me.hyoseo.housingfinance.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import me.hyoseo.housingfinance.database.model.Institute;
 import me.hyoseo.housingfinance.database.model.InstituteSupport;
 import me.hyoseo.housingfinance.database.repository.InstituteRepository;
@@ -21,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
-@Slf4j
+@Api(tags = {"데이터 파일 컨트롤러"})
 @RequiredArgsConstructor
 @RequestMapping("/data")
 @RestController
@@ -31,6 +34,8 @@ public class DataFileController {
 
     private final InstituteSupportRepository instituteSupportRepository;
 
+    @ApiOperation(value = "주택금융 공급현황 분석 데이터 CSV 파일 적용", response = ResponseEntity.class)
+    @ApiImplicitParams(@ApiImplicitParam(name = "Access-Token", value = "Access-Token 필요", paramType = "header"))
     @Transactional
     @PostMapping("/csv_files")
     public ResponseEntity<AppliedFile> applyFileToDatabase(

@@ -1,7 +1,10 @@
 package me.hyoseo.housingfinance.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import me.hyoseo.housingfinance.database.model.User;
 import me.hyoseo.housingfinance.database.repository.UserRepository;
 import me.hyoseo.housingfinance.error.CommonException;
@@ -16,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
-@Slf4j
+@Api(tags = {"계정 컨트롤러"})
 @RequiredArgsConstructor
 @RequestMapping("/auth")
 @RestController
@@ -26,6 +29,7 @@ public class AuthController {
 
     private final CryptoService cryptoService;
 
+    @ApiOperation(value = "회원가입", response = ResponseEntity.class)
     @Transactional
     @PostMapping("/signup")
     public ResponseEntity<AccessToken> signUp(@Valid @RequestBody IdPassword idPassword, Errors errors) {
@@ -41,8 +45,12 @@ public class AuthController {
         return ResponseEntity.ok(new AccessToken(cryptoService.createToken(idPassword.getId())));
     }
 
+    @ApiOperation(value = "로그인", response = ResponseEntity.class)
     @PostMapping("/signin")
-    public ResponseEntity<AccessToken> signIn(@RequestBody IdPassword idPassword) {
+    public ResponseEntity<AccessToken> signIn(@Valid @RequestBody IdPassword idPassword, Errors errors) {
+        if (errors.hasErrors())
+            throw CommonException.create(ErrorCode.BAD_REQUEST, errors.getFieldError().getDefaultMessage());
+
         User user = userRepository.findById(idPassword.getId())
                 .orElseThrow(() -> CommonException.create(ErrorCode.ID_OR_PASSWORD_IS_WRONG));
 
@@ -53,6 +61,8 @@ public class AuthController {
         return ResponseEntity.ok(new AccessToken(cryptoService.createToken(idPassword.getId())));
     }
 
+    @ApiOperation(value = "JWT 갱신", response = ResponseEntity.class)
+    @ApiImplicitParams(@ApiImplicitParam(name = "Access-Token", value = "Access-Token 필요", paramType = "header"))
     @PostMapping("/refresh")
     public ResponseEntity<AccessToken> refresh(@RequestHeader("Authorization") String authorization,
                                                @RequestAttribute("user_id") String userId) {
