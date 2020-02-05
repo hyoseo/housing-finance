@@ -6,6 +6,8 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import me.hyoseo.housingfinance.database.model.Institute;
+import me.hyoseo.housingfinance.database.model.InstituteMonthlyAvgSupport;
+import me.hyoseo.housingfinance.database.model.InstituteYearlySupport;
 import me.hyoseo.housingfinance.database.repository.InstituteRepository;
 import me.hyoseo.housingfinance.database.repository.InstituteSupportRepository;
 import me.hyoseo.housingfinance.error.CommonException;
@@ -14,6 +16,7 @@ import me.hyoseo.housingfinance.response.InstituteAvgMinMaxSupport;
 import me.hyoseo.housingfinance.response.TopInstituteSupport;
 import me.hyoseo.housingfinance.response.TotalInstituteSupport;
 import me.hyoseo.housingfinance.response.YearlyInstitutesSupport;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.persistence.Tuple;
 import java.util.List;
 
 @Api(tags = {"기관 컨트롤러"})
@@ -50,19 +52,17 @@ public class InstituteController {
 
         Short lastYear = 0;
         YearlyInstitutesSupport yearlyInstitutesSupport = null;
-        for (Tuple tuple : instituteSupportRepository.findYearlySupport()) {
-            Short year = (Short) tuple.get(0);
-            Institute institute = (Institute) tuple.get(1);
-            Long supportAmount = (Long) tuple.get(2);
 
-            if (year.equals(lastYear) == false) {
-                lastYear = year;
-                yearlyInstitutesSupport = new YearlyInstitutesSupport(year);
+        for (InstituteYearlySupport instituteYearlySupport : instituteSupportRepository.findYearlySupport()) {
+            if (instituteYearlySupport.getYear().equals(lastYear) == false) {
+                lastYear = instituteYearlySupport.getYear();
+                yearlyInstitutesSupport = new YearlyInstitutesSupport(instituteYearlySupport.getYear());
                 totalInstituteSupport.getYearlyInstitutesSupportList().add(yearlyInstitutesSupport);
             }
 
-            yearlyInstitutesSupport.getDetailAmount().put(institute.getName(), supportAmount);
-            yearlyInstitutesSupport.setTotalAmount(yearlyInstitutesSupport.getTotalAmount() + supportAmount);
+            yearlyInstitutesSupport.getDetailAmount()
+                    .put(instituteYearlySupport.getInstitute().getName(), Long.valueOf(instituteYearlySupport.getSupportAmount()));
+            yearlyInstitutesSupport.setTotalAmount(yearlyInstitutesSupport.getTotalAmount() + instituteYearlySupport.getSupportAmount());
         }
 
         return ResponseEntity.ok(totalInstituteSupport);
@@ -72,13 +72,14 @@ public class InstituteController {
     @ApiImplicitParams(@ApiImplicitParam(name = "Access-Token", value = "Access-Token 필요", paramType = "header"))
     @GetMapping("/top_institute_support")
     public ResponseEntity<TopInstituteSupport> getTopInstituteSupport() {
-        List<Tuple> tuples = instituteSupportRepository.findYearlyTopSupportInstitutes(
-                PageRequest.of(0, 1));
-        if (tuples.isEmpty())
+        Page<InstituteYearlySupport> yearlyTopSupportInstitutes = instituteSupportRepository
+                .findYearlyTopSupportInstitutes(PageRequest.of(0, 1));
+
+        if (yearlyTopSupportInstitutes.hasContent() == false)
             throw CommonException.create(ErrorCode.NOT_FOUND);
 
-        return ResponseEntity.ok(new TopInstituteSupport((Short)tuples.get(0).get(0),
-                ((Institute)tuples.get(0).get(1)).getName()));
+        return ResponseEntity.ok(new TopInstituteSupport(yearlyTopSupportInstitutes.getContent().get(0).getYear(),
+                yearlyTopSupportInstitutes.getContent().get(0).getInstitute().getName()));
     }
 
     @ApiOperation(value = "전체 년도에서 외환은행의 지원금액 평균 중에서 가장 작은 금액과 큰 금액", response = ResponseEntity.class)
@@ -88,15 +89,18 @@ public class InstituteController {
             @RequestParam(value = "bank", defaultValue = "외환은행") String bank) {
         Institute institute = instituteRepository.findByName(bank)
                 .orElseThrow(() -> CommonException.create(ErrorCode.NOT_FOUND));
-        List<Tuple> tuples = instituteSupportRepository.findYearlyAvgSupport(institute.getCode());
-        if (tuples.size() < 2)
+
+        List<InstituteMonthlyAvgSupport> monthlyAvgSupports = instituteSupportRepository.findMonthlyAvgSupport(institute.getCode());
+        if (monthlyAvgSupports.size() < 2)
             throw CommonException.create(ErrorCode.NOT_FOUND);
 
         InstituteAvgMinMaxSupport instituteAvgMinMaxSupport = new InstituteAvgMinMaxSupport(institute.getName());
-        instituteAvgMinMaxSupport.addYearAvgSupport((Short) tuples.get(tuples.size()-1).get(0),
-                Math.round((Double)tuples.get(tuples.size()-1).get(2)));
-        instituteAvgMinMaxSupport.addYearAvgSupport((Short) tuples.get(0).get(0),
-                Math.round((Double)tuples.get(0).get(2)));
+        instituteAvgMinMaxSupport.addYearAvgSupport(
+                monthlyAvgSupports.get(monthlyAvgSupports.size() - 1).getYear(),
+                Math.round(monthlyAvgSupports.get(monthlyAvgSupports.size() - 1).getAvgSupportAmount()));
+        instituteAvgMinMaxSupport.addYearAvgSupport(
+                monthlyAvgSupports.get(0).getYear(),
+                Math.round(monthlyAvgSupports.get(0).getAvgSupportAmount()));
 
         return ResponseEntity.ok(instituteAvgMinMaxSupport);
     }
