@@ -7,9 +7,8 @@ import lombok.ToString;
 @ToString
 public class CommonException extends RuntimeException {
     public CommonException(ErrorCode errorCode, Exception internalException) {
-        super(internalException != null ? internalException.getMessage() : errorCode.getMessage());
+        super(internalException != null ? internalException.getMessage() : errorCode.getMessage(), internalException);
         this.errorCode = errorCode;
-        this.internalException = internalException;
     }
 
     public static CommonException create(ErrorCode errorCode) {
@@ -31,6 +30,4 @@ public class CommonException extends RuntimeException {
     }
 
     private ErrorCode errorCode;
-
-    private Exception internalException;
 }

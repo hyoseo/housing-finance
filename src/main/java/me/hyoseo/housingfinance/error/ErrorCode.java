@@ -15,8 +15,8 @@ public enum ErrorCode {
     EXTERNAL_SERVER_ERROR(90, "external server error", HttpStatus.INTERNAL_SERVER_ERROR),
     INTERNAL_SERVER_ERROR(98, "internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
 
-    ID_OR_PASSWORD_IS_WRONG(300, "Id or Password is wrong", HttpStatus.NOT_FOUND),
-    ALREADY_EXIST_ID(300, "The Id is already exists", HttpStatus.BAD_REQUEST),
+    ID_OR_PASSWORD_IS_WRONG(300, "Id or Password is wrong", HttpStatus.FORBIDDEN),
+    ALREADY_EXIST_ID(300, "The Id is already exists", HttpStatus.FORBIDDEN),
 
     UNKNOWN_ERROR(999, "unknown error", HttpStatus.INTERNAL_SERVER_ERROR);
 

@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorMessage> handleException(HttpServletRequest req, CommonException ex) {
         ErrorCode errorCode = ex.getErrorCode();
         log.error("ERROR_SOURCE : " + ex.getStackTrace()[1].toString());
-        printError(req, ex.getInternalException() != null ? ex.getInternalException() : ex, errorCode);
+        printError(req, ex.getCause() != null ? ex.getCause() : ex, errorCode);
 
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
                 .body(new ErrorMessage(ErrorCode.UNKNOWN_ERROR.getCode(), ErrorCode.UNKNOWN_ERROR.getMessage()));
     }
 
-    public void printError(HttpServletRequest req, Exception ex, ErrorCode code) {
+    public void printError(HttpServletRequest req, Throwable ex, ErrorCode code) {
         StringBuilder errorInfo = new StringBuilder();
         errorInfo.append("ERROR_INFO : ")
                 .append(req.getMethod()).append(" ").append(req.getRequestURI()).append(", Access-Token : ")

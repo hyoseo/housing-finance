@@ -12,6 +12,7 @@ import me.hyoseo.housingfinance.error.ErrorCode;
 import me.hyoseo.housingfinance.request.IdPassword;
 import me.hyoseo.housingfinance.response.AccessToken;
 import me.hyoseo.housingfinance.service.CryptoService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +41,11 @@ public class AuthController {
         if (userRepository.existsById(idPassword.getId()))
             throw CommonException.create(ErrorCode.ALREADY_EXIST_ID);
 
-        userRepository.save(new User(idPassword.getId(), encPassword));
+        try {
+            userRepository.saveAndFlush(new User(idPassword.getId(), encPassword));
+        } catch (DataIntegrityViolationException e) {
+            throw CommonException.create(ErrorCode.ALREADY_EXIST_ID, e);
+        }
 
         return ResponseEntity.ok(new AccessToken(cryptoService.createToken(idPassword.getId())));
     }
