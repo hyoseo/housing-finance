@@ -12,11 +12,12 @@ import me.hyoseo.housingfinance.error.ErrorCode;
 import me.hyoseo.housingfinance.request.IdPassword;
 import me.hyoseo.housingfinance.response.AccessToken;
 import me.hyoseo.housingfinance.service.CryptoService;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
@@ -30,6 +31,8 @@ public class AuthController {
 
     private final CryptoService cryptoService;
 
+    private final EntityManager entityManager;
+
     @ApiOperation(value = "회원가입", response = ResponseEntity.class)
     @Transactional
     @PostMapping("/signup")
@@ -42,8 +45,9 @@ public class AuthController {
             throw CommonException.create(ErrorCode.ALREADY_EXIST_ID);
 
         try {
-            userRepository.saveAndFlush(new User(idPassword.getId(), encPassword));
-        } catch (DataIntegrityViolationException e) {
+            entityManager.persist(new User(idPassword.getId(), encPassword));
+            entityManager.flush();
+        } catch (PersistenceException e) {
             throw CommonException.create(ErrorCode.ALREADY_EXIST_ID, e);
         }
 

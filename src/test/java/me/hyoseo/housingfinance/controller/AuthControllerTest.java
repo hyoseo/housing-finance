@@ -3,10 +3,10 @@ package me.hyoseo.housingfinance.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import io.jsonwebtoken.ExpiredJwtException;
-import lombok.extern.slf4j.Slf4j;
 import me.hyoseo.housingfinance.database.repository.UserRepository;
 import me.hyoseo.housingfinance.request.IdPassword;
 import me.hyoseo.housingfinance.service.CryptoService;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -46,7 +45,7 @@ public class AuthControllerTest {
 
     @Test
     public void signUp() throws Exception {
-        requestSignUp("hyoseo", "abcd12#");
+        requestSignUp("hyoseo1", "abcd12#");
     }
 
     public String requestSignUp(String id, String password) throws Exception {
@@ -60,7 +59,7 @@ public class AuthControllerTest {
                 .andReturn();
 
         String singUpAccessToken = JsonPath.read(mvcSignUpResult.getResponse().getContentAsString(), "$.access_token");
-        assertThat(cryptoService.parse(singUpAccessToken)).isEqualTo("hyoseo");
+        assertThat(cryptoService.parse(singUpAccessToken)).isEqualTo(id);
 
         return singUpAccessToken;
     }
@@ -70,11 +69,14 @@ public class AuthControllerTest {
         AtomicBoolean isTheIdUsed = new AtomicBoolean(false);
 
         CompletableFuture.allOf(
-                requestSignUpWithSameId("hyoseo", "abcde12#", isTheIdUsed),
-                requestSignUpWithSameId("hyoseo", "fjksl12#", isTheIdUsed),
-                requestSignUpWithSameId("hyoseo", "vnxcm42$", isTheIdUsed),
-                requestSignUpWithSameId("hyoseo", "uiroe12&", isTheIdUsed),
-                requestSignUpWithSameId("hyoseo", "nmccc12#", isTheIdUsed))
+                requestSignUpWithSameId("hyoseo2", "abcde12#", isTheIdUsed),
+                requestSignUpWithSameId("hyoseo2", "fjksl12#", isTheIdUsed),
+                requestSignUpWithSameId("hyoseo2", "vnxcm42$", isTheIdUsed),
+                requestSignUpWithSameId("hyoseo2", "uiroe12&", isTheIdUsed),
+                requestSignUpWithSameId("hyoseo2", "safoe12&", isTheIdUsed),
+                requestSignUpWithSameId("hyoseo2", "uvxce12&", isTheIdUsed),
+                requestSignUpWithSameId("hyoseo2", "rtvbe12&", isTheIdUsed),
+                requestSignUpWithSameId("hyoseo2", "nmccc12#", isTheIdUsed))
                 .join();
 
         assertThat(isTheIdUsed.get()).isEqualTo(true);
@@ -94,10 +96,12 @@ public class AuthControllerTest {
                 if (mvcResult.getResponse().getStatus() == HttpStatus.OK.value()) {
                     assertThat(isTheIdUsed.compareAndSet(false, true)).isEqualTo(true);
                     String accessToken = JsonPath.read(mvcResult.getResponse().getContentAsString(), "$.access_token");
-                    assertThat(cryptoService.parse(accessToken)).isEqualTo("hyoseo");
+                    assertThat(cryptoService.parse(accessToken)).isEqualTo(id);
                 } else {
                     assertThat(mvcResult.getResponse().getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value());
-                    assertThat(mvcResult.getResolvedException()).hasCauseExactlyInstanceOf(DataIntegrityViolationException.class);
+                    if (mvcResult.getResolvedException().getCause() != null)
+                        assertThat(mvcResult.getResolvedException().getCause().getCause())
+                                .isOfAnyClassIn(DataIntegrityViolationException.class, ConstraintViolationException.class);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -108,14 +112,14 @@ public class AuthControllerTest {
 
     @Test
     public void signIn() throws Exception {
-        String singUpAccessToken = requestSignUp("hyoseo", "abcd12#");
+        String singUpAccessToken = requestSignUp("hyoseo3", "abcd12#");
 
         Thread.sleep(1000);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
         mockMvc.perform(post("/auth/signin")
-                .content(objectMapper.writeValueAsString(new IdPassword("hyoseo", "abcd12#")))
+                .content(objectMapper.writeValueAsString(new IdPassword("hyoseo3", "abcd12#")))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -123,7 +127,7 @@ public class AuthControllerTest {
                     String signInAccessToken = JsonPath.read(
                             mvcResult.getResponse().getContentAsString(),
                             "$.access_token");
-                    assertThat(cryptoService.parse(signInAccessToken)).isEqualTo("hyoseo");
+                    assertThat(cryptoService.parse(signInAccessToken)).isEqualTo("hyoseo3");
                     assertThat(signInAccessToken).isNotEqualTo(singUpAccessToken);
                 })
                 .andDo(print());
@@ -131,14 +135,14 @@ public class AuthControllerTest {
 
     @Test
     public void refresh() throws Exception {
-        String singUpAccessToken = requestSignUp("hyoseo", "abcd12#");
+        String singUpAccessToken = requestSignUp("hyoseo4", "abcd12#");
 
         Thread.sleep(1000);
 
         mockMvc.perform(post("/auth/refresh")
                 .header("Access-Token", singUpAccessToken)
                 .header("Authorization", "Bearer Token")
-                .requestAttr("user_id", "hyoseo")
+                .requestAttr("user_id", "hyoseo4")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -146,7 +150,7 @@ public class AuthControllerTest {
                     String refreshAccessToken = JsonPath.read(
                             mvcResult.getResponse().getContentAsString(),
                             "$.access_token");
-                    assertThat(cryptoService.parse(refreshAccessToken)).isEqualTo("hyoseo");
+                    assertThat(cryptoService.parse(refreshAccessToken)).isEqualTo("hyoseo4");
                     assertThat(refreshAccessToken).isNotEqualTo(singUpAccessToken);
                 })
                 .andDo(print());
