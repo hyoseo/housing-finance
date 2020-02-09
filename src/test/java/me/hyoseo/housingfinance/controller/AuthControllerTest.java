@@ -49,6 +49,8 @@ public class AuthControllerTest {
     }
 
     public String requestSignUp(String id, String password) throws Exception {
+        assertThat(userRepository.existsById(id)).isEqualTo(false);
+
         ObjectMapper objectMapper = new ObjectMapper();
 
         MvcResult mvcSignUpResult = mockMvc.perform(post("/auth/signup")
